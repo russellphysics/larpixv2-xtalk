@@ -7,12 +7,13 @@ import shutil
 import larpix.format.rawhdf5format as rhdf5
 import larpix.format.pacman_msg_format as pacman_msg_fmt
 
+_default_read=False
 _default_v2a=False
 _default_run=0
-_default_daq_time=1
+_default_daq_time=3
 _default_test_ioc=1
-_default_test_chip=43
-_default_test_channel=8
+_default_test_chip=11
+_default_test_channel=40
 _default_clk_ctrl = 1
 clk_ctrl_2_clk_ratio_map = {0: 10, 1: 20, 2: 40, 3: 80}
 home_dir='/home/brussell/xtalk/'
@@ -171,7 +172,8 @@ def v2a_construct_one_chip_network(c, io, in_io_channel, chip_list):
 
 
             
-def main(v2a=_default_v2a, \
+def main(read=_default_read, \
+         v2a=_default_v2a, \
          run=_default_run, \
          daq_time=_default_daq_time, \
          test_ioc=_default_test_ioc, \
@@ -231,7 +233,7 @@ def main(v2a=_default_v2a, \
     c.io.disable_packet_parsing = True
     c.io.enable_raw_file_writing = True
     
-    for i in range(10,12,1):
+    for i in range(20,51,1):
         c[key].config.threshold_global=i; c.write_configuration(key,'threshold_global')
         time.sleep(0.2)
         now=time.strftime("%Y-%m-%d-%H-%M-%S-%Z")
@@ -254,6 +256,10 @@ def main(v2a=_default_v2a, \
         data_rate_start=time.time()
         while True:
             c.read()
+            if read:
+                #c.read_configuration(key,'chip_id',timeout=0.25)
+                packets=c[key].get_configuration_read_packets([122])
+                c.send(packets)
             now=time.time()
             if  now > (run_start+daq_time): break
         c.stop_listening()
@@ -271,6 +277,8 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--v2a', default=_default_v2a, \
                         action='store_true', help='''v2a ASIC''')
+    parser.add_argument('--read', default=_default_read, \
+                        action='store_true', help='''periodic read''')
     parser.add_argument('--run', default=_default_run, \
                         type=int, help='''run iteration''')
     parser.add_argument('--daq_time', default=_default_daq_time, \
