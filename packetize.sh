@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # target directory
-directory="/home/brussell/xtalk/run1"
+directory="/home/brussell/xtalk/run24"
 
 # check if the target is not a directory
 if [ ! -d "$directory" ]; then
@@ -14,13 +14,11 @@ p="packet"
 for file in "$directory"/*; do
     if [ -f "$file" ]; then
 	echo "$file"
-	#a=sed -i -e 's/packet/raw/g' $file
-	#echo "$a"
 	echo "${file}"
 	echo "${#file}"
-	prefix="${file:0:26}"
+	prefix="${file:0:27}"
 	echo "${prefix}"
-	suffix="${file:26:88}"
+	suffix="${file:27:89}"
 	suffix="${suffix//raw}"
 	echo "${suffix}"
 	nname="$prefix$p$suffix"
